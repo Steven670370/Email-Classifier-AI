@@ -3,7 +3,7 @@ from typing import List
 
 # Define the Neuron class globally
 class Neuron:
-    def __init__(self, pos_range=20):
+    def __init__(self, pos_range=10):
         self.value = 0
         # Randomly generate a 2D position
         self.position = (random.uniform(-pos_range, pos_range),
@@ -106,3 +106,5 @@ def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: fl
             # Also remove weight connection
             if neuron in upper.weights:
                 del upper.weights[neuron]
+        # Reset neuron layer for next iteration
+        neuron.layer = float('inf')
