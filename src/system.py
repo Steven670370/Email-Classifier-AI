@@ -97,8 +97,13 @@ def forward_propagate(all_neurons, input_neurons, config):
 
 # Conclusion function
 def conclusion(neurons: List[Neuron]):
-    total_value = sum(neuron.value for neuron in neurons)
-    average_value = total_value / len(neurons) if neurons else 0
+    """
+    Create a temporary global readout node.
+    It is NOT part of the network and will be discarded immediately.
+    """
+    # virtual global node (not stored)
+    total_value = sum(n.value for n in neurons)
+    average_value = total_value / len(neurons) if neurons else 0.0
     return average_value
 
 
@@ -107,39 +112,52 @@ def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: fl
     error = target_value - average_value    # difference between desired and current value
     for neuron in neurons:
         if neuron.layer == float('inf'):
-            neuron.position = (neuron.position[0] * (1 - pos_rate), neuron.position[1] * (1 - pos_rate))
-        # Remove distant neurons from input_vector
-        to_remove = []
-        total_x = 0
-        total_y = 0
-        for upper_layer_neuron in neuron.input_vector:
-            dx = upper_layer_neuron.position[0] - neuron.position[0]
-            dy = upper_layer_neuron.position[1] - neuron.position[1]
-            distance = (dx**2 + dy**2) ** 0.5
-            if distance < 1:
-                # Adjust weight (gradient-like rule)
-                old_weight = upper_layer_neuron.weights.get(neuron, 1)
-                new_weight = old_weight + learning_rate * upper_layer_neuron.value * error * (1 - distance)
-                upper_layer_neuron.weights[neuron] = new_weight
-                # Accumulate position adjustments
-                total_x += pos_rate * (1 - distance) * old_weight * upper_layer_neuron.value * dx
-                total_y += pos_rate * (1 - distance) * old_weight * upper_layer_neuron.value * dy
-            else:
-                to_remove.append(upper_layer_neuron)
-        for upper in to_remove:
-            # Remove distant neurons from input_vector and weights
-            neuron.input_vector.remove(upper)
-            # Also remove weight connection
-            if neuron in upper.weights:
-                del upper.weights[neuron]
-        # Adjust position slightly (closer neurons contribute more)
-        # Update position
-        neuron.position = (
-            neuron.position[0] + total_x,
-            neuron.position[1] + total_y
-        )
-        # Reset neuron layer for next iteration
-        neuron.layer = float('inf')
+            import math
+            dx = -neuron.position[0]
+            dy = -neuron.position[1]
+            distance = math.sqrt(dx*dx + dy*dy) + 1e-6
+            # Unit vector towards origin
+            ux = dx / distance
+            uy = dy / distance
+            influence = math.exp(-distance)
+            # Update position towards origin
+            neuron.position = (
+            neuron.position[0] + pos_rate * error * influence * ux,
+            neuron.position[1] + pos_rate * error * influence * uy
+            )
+        else:
+            # Remove distant neurons from input_vector
+            to_remove = []
+            total_x = 0
+            total_y = 0
+            for upper_layer_neuron in neuron.input_vector:
+                dx = upper_layer_neuron.position[0] - neuron.position[0]
+                dy = upper_layer_neuron.position[1] - neuron.position[1]
+                distance = (dx**2 + dy**2) ** 0.5
+                if distance < 1:
+                    # Adjust weight (gradient-like rule)
+                    old_weight = upper_layer_neuron.weights.get(neuron, 1)
+                    new_weight = old_weight + learning_rate * upper_layer_neuron.value * error * (1 - distance)
+                    upper_layer_neuron.weights[neuron] = new_weight
+                    # Accumulate position adjustments
+                    total_x += pos_rate * (1 - distance) * old_weight * upper_layer_neuron.value * dx
+                    total_y += pos_rate * (1 - distance) * old_weight * upper_layer_neuron.value * dy
+                else:
+                    to_remove.append(upper_layer_neuron)
+            for upper in to_remove:
+                # Remove distant neurons from input_vector and weights
+                neuron.input_vector.remove(upper)
+                # Also remove weight connection
+                if neuron in upper.weights:
+                    del upper.weights[neuron]
+            # Adjust position slightly (closer neurons contribute more)
+            # Update position
+            neuron.position = (
+                neuron.position[0] + total_x,
+                neuron.position[1] + total_y
+            )
+            # Reset neuron layer for next iteration
+            neuron.layer = float('inf')
 
 
 # Initialize model
