@@ -17,5 +17,5 @@ def evaluate(model, dataset, config):
         forward_propagate(all_neurons, input_neurons, config)
         # 4. output
         output = conclusion(all_neurons)
-        total_error += (target - output) ** 2
+        total_error += abs(target - output)
     return total_error / len(dataset)

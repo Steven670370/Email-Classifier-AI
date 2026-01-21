@@ -14,6 +14,7 @@ class Neuron:
         self.layer = float('inf')
         # Input vectors
         self.input_vector = []  # Neurons that feed into this neuron
+        self.output_vector = [] # Neurons that this neuron feeds into
 
 
 # Function to create a Neuron object
@@ -53,6 +54,8 @@ def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron], trai
                 # Store input relationship
                 if(training and neuron not in target_neuron.input_vector):
                     target_neuron.input_vector.append(neuron)
+                if(training and target_neuron not in neuron.output_vector):
+                    neuron.output_vector.append(target_neuron)
         # If no neuron contributes, keep old value
         if active_neurons == 0:
             average_value = target_neuron.value
@@ -103,13 +106,13 @@ def conclusion(neurons: List[Neuron]):
     It is NOT part of the network and will be discarded immediately.
     """
     # virtual global node (not stored)
-    total_value = sum(n.value for n in neurons)
+    total_value = sum(n.value for n in neurons if not n.output_vector)
     average_value = total_value / len(neurons) if neurons else 0.0
     return average_value
 
 
  # Adjust weights and neuron positions by layers
-def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: float, learning_rate=0.1, pos_rate=0.05):
+def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: float, learning_rate=0.1, pos_rate=0.2):
     error = target_value - average_value    # difference between desired and current value
     for neuron in neurons:
         if neuron.layer == float('inf'):
@@ -146,8 +149,9 @@ def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: fl
                 else:
                     to_remove.append(upper_layer_neuron)
             for upper in to_remove:
-                # Remove distant neurons from input_vector and weights
+                # Remove distant neurons from input_vector, output_vector, and weights
                 neuron.input_vector.remove(upper)
+                upper.output_vector.remove(neuron)
                 # Also remove weight connection
                 if neuron in upper.weights:
                     del upper.weights[neuron]
@@ -194,5 +198,6 @@ def train_one_epoch(model, dataset, config):
             all_neurons,
             average_value,
             target,
-            learning_rate=config["learning_rate"]
+            learning_rate=config["learning_rate"],
+            pos_rate=config["pos_rate"]
         )

@@ -11,6 +11,7 @@ def load_config():
         "num_hidden": 100,      # number of hidden neurons
         "seed": 40,             # random seed for reproducibility
         "learning_rate": 0.5,   # learning rate for weight adjustment
+        "pos_rate": 0.2         # position adjustment rate
     }
 
 def set_seed(config):
