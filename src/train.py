@@ -56,10 +56,10 @@ def main():
         # Save snapshot
         save_epoch_snapshot(all_neurons, epoch)
         # Validation error
-        val_error = evaluate(model, val_dataset)
+        val_error = evaluate(model, val_dataset, config)
         logging.info(f"Epoch {epoch}: avg validation error = {val_error:.4f}")
     # Final evaluation on test set
-    final_error = evaluate(model, test_dataset)
+    final_error = evaluate(model, test_dataset, config)
     logging.info(f"Final test error = {final_error:.4f}")
 
 if __name__ == "__main__":
