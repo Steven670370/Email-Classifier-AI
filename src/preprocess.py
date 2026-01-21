@@ -1,4 +1,5 @@
 import os
+import joblib
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -34,9 +35,6 @@ def run_preprocess():
     if len(emails) == 0:
         raise RuntimeError("No .txt files found in ../data/raw")
 
-    import os
-    import joblib
-    from sklearn.feature_extraction.text import TfidfVectorizer
     # Check if a saved vectorizer exists to avoid re-fitting
     VECTORIZER_PATH = "tfidf_vectorizer.pkl"
     # Check if vectorizer already exists
