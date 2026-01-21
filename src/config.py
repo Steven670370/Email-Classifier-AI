@@ -1,5 +1,5 @@
 # config.py
-from random import random
+import random
 
 # Load configuration settings
 def load_config():
