@@ -34,9 +34,21 @@ def run_preprocess():
     if len(emails) == 0:
         raise RuntimeError("No .txt files found in ../data/raw")
 
-    # Convert to TF-IDF vectors
-    vectorizer = TfidfVectorizer(max_features=10)
-    X = vectorizer.fit_transform(emails).toarray()
+    import os
+    import joblib
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    # Check if a saved vectorizer exists to avoid re-fitting
+    VECTORIZER_PATH = "tfidf_vectorizer.pkl"
+    # Check if vectorizer already exists
+    if os.path.exists(VECTORIZER_PATH):
+        vectorizer = joblib.load(VECTORIZER_PATH)
+        X = vectorizer.transform(emails).toarray()
+    else:
+        # Convert to TF-IDF vectors
+        vectorizer = TfidfVectorizer(max_features=10)
+        X = vectorizer.fit_transform(emails).toarray()
+        # Save the vectorizer for future use
+        joblib.dump(vectorizer, VECTORIZER_PATH)
 
     # Save processed data
     np.savetxt(os.path.join(output_folder, "processed_emails.csv"), X, delimiter=",")

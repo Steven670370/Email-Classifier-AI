@@ -27,3 +27,16 @@ def predict_batch(model, dataset, config):
     for inputs, _ in dataset:
         outputs.append(predict(model, inputs, config))
     return outputs
+
+
+# Additional utility to predict from raw email text
+import joblib
+from predict import predict
+
+vectorizer = joblib.load("tfidf_vectorizer.pkl")
+
+def predict_from_text(model, text, config):
+    # Convert text to TF-IDF vector
+    X = vectorizer.transform([text]).toarray()[0]
+    # Predict using the neural network
+    return predict(model, X, config)

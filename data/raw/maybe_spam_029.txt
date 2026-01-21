@@ -1,0 +1,4 @@
+Hello,
+A new offer has been prepared for selected users.
+Check in if you would like to know more.
+Thanks,

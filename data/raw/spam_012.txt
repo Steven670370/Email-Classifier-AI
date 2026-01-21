@@ -1,0 +1,4 @@
+Dear user,
+You have won a prize.
+Please verify your account immediately.
+Failure to respond may result in loss of reward.

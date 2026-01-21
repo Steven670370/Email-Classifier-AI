@@ -1,0 +1,4 @@
+Dear customer,
+We detected unusual activity on your account.
+Please confirm your information immediately.
+Thank you for your cooperation.
