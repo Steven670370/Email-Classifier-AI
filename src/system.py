@@ -23,7 +23,7 @@ def create_neuron(pos_range):
 # ------------------------------------------------------------------
 
 # Activate function (for single layer)
-def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron]):
+def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron], training=False):
     layer_activated_neurons = list()
     layer_unactivated_neurons = list()
     """
@@ -51,7 +51,8 @@ def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron]):
                     neuron.layer + 1
                 )
                 # Store input relationship
-                target_neuron.input_vector.append(neuron)
+                if(training and neuron not in target_neuron.input_vector):
+                    target_neuron.input_vector.append(neuron)
         # If no neuron contributes, keep old value
         if active_neurons == 0:
             average_value = target_neuron.value
@@ -68,7 +69,7 @@ def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron]):
     return (layer_activated_neurons, layer_unactivated_neurons)
 
 # Forward propagation function (for multiple layers)
-def forward_propagate(all_neurons, input_neurons, config):
+def forward_propagate(all_neurons, input_neurons, config, training=False):
     activated_neurons = input_neurons
     for neuron in input_neurons:
         neuron.layer = 0  # Ensure input neurons have layer=0
@@ -86,7 +87,7 @@ def forward_propagate(all_neurons, input_neurons, config):
         if not layer_neurons:
             continue
         # Activate neurons
-        layer_activated_neurons, _ = activate(activated_neurons, layer_neurons)
+        layer_activated_neurons, _ = activate(activated_neurons, layer_neurons, training)
         # Update activated list
         activated_neurons += layer_activated_neurons
         # Remove activated neurons from unactivated list
@@ -182,7 +183,7 @@ def train_one_epoch(model, dataset, config):
         for neuron, value in zip(input_neurons, inputs):
             neuron.value = value
         # 2. forward activation
-        forward_propagate(all_neurons, input_neurons, config)
+        forward_propagate(all_neurons, input_neurons, config, training=True)
         # 3. compute output
         average_value = conclusion(all_neurons)
         # 4. backpropagation
