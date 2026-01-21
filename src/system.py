@@ -164,12 +164,15 @@ def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: fl
 # Initialize model
 def init_model(config):
     input_neurons = [Neuron(config["pos_range"]) for _ in range(config["num_input"])]
-    output_neurons = [Neuron(config["pos_range"]) for _ in range(config["num_output"])]
+    hidden_neurons = [Neuron(config["pos_range"]) for _ in range(config["num_hidden"])]
+    all_neurons = input_neurons + hidden_neurons
     for n in input_neurons:
         n.layer = 0 # input layer (origin point)
     return {
         "input": input_neurons,
-        "output": output_neurons,
+        "hidden": hidden_neurons,
+        "all": all_neurons,
+        "neurons": all_neurons,
     }
 
 
