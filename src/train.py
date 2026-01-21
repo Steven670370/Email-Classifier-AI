@@ -44,12 +44,20 @@ def main():
     model = init_model(config)
     # Get all neurons for snapshotting
     all_neurons = model["neurons"]
-    # Training loop
+    batch_size = config.get("batch_size", 32) # default batch size
+    # Training loop with mini-batches
     for epoch in range(config["epochs"]):
-        train_one_epoch(model, train_dataset, config)  # training step
-        save_epoch_snapshot(all_neurons, epoch)     # snapshot step
-        error = evaluate(model, val_dataset)         # evaluation step
-        logging.info(f"Epoch {epoch}: avg error = {error:.4f}")
+        # Shuffle training data
+        np.random.shuffle(train_dataset)
+        # Process mini-batches
+        for i in range(0, len(train_dataset), batch_size):
+            batch = train_dataset[i:i+batch_size]
+            train_one_epoch(model, batch, config)
+        # Save snapshot
+        save_epoch_snapshot(all_neurons, epoch)
+        # Validation error
+        val_error = evaluate(model, val_dataset)
+        logging.info(f"Epoch {epoch}: avg validation error = {val_error:.4f}")
     # Final evaluation on test set
     final_error = evaluate(model, test_dataset)
     logging.info(f"Final test error = {final_error:.4f}")
