@@ -108,7 +108,12 @@ def conclusion(neurons: List[Neuron]):
     # virtual global node (not stored)
     total_value = sum(n.value for n in neurons if not n.output_vector)
     average_value = total_value / len(neurons) if neurons else 0.0
-    return average_value
+    if average_value > 0.6:
+        return 1
+    elif average_value < 0.4:
+        return 0
+    else:
+        return 0.5
 
 
  # Adjust weights and neuron positions by layers
@@ -135,13 +140,13 @@ def adjust_neurons(neurons: List[Neuron], average_value: float, target_value: fl
             total_x = 0
             total_y = 0
             for upper_layer_neuron in neuron.input_vector:
-                dx = upper_layer_neuron.position[0] - neuron.position[0]
-                dy = upper_layer_neuron.position[1] - neuron.position[1]
+                dx = neuron.position[0] - upper_layer_neuron.position[0]
+                dy = neuron.position[1] - upper_layer_neuron.position[1]
                 distance = (dx**2 + dy**2) ** 0.5
                 if distance < 1:
                     # Adjust weight (gradient-like rule)
                     old_weight = upper_layer_neuron.weights.get(neuron, 1)
-                    new_weight = old_weight + learning_rate * upper_layer_neuron.value * error * (1 - distance)
+                    new_weight = old_weight - learning_rate * upper_layer_neuron.value * error * (1 - distance)
                     upper_layer_neuron.weights[neuron] = new_weight
                     # Accumulate position adjustments
                     total_x += pos_rate * (1 - distance) * old_weight * upper_layer_neuron.value * dx

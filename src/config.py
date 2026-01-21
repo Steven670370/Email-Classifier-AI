@@ -6,10 +6,10 @@ def load_config():
     return {
         "epochs": 50,           # number of training epochs
         "batch_size": 32,       # size of each training batch
-        "num_input": 100,       # number of input neurons
+        "num_input": 50,        # number of input neurons
         "pos_range": 10,        # position range for neurons
         "num_hidden": 100,      # number of hidden neurons
-        "seed": 40,             # random seed for reproducibility
+        "seed": 20,             # random seed for reproducibility
         "learning_rate": 0.5,   # learning rate for weight adjustment
         "pos_rate": 0.2         # position adjustment rate
     }
