@@ -2,34 +2,51 @@ import os
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Paths
-raw_folder = "../data/raw"        # Folder with raw emails
-output_folder = "../data/processed"  # Folder to save processed data
+# Define paths
+raw_folder = "../data/raw"
+output_folder = "../data/processed"
 os.makedirs(output_folder, exist_ok=True)
 
-# Read all emails
-emails = []
-labels = []
-for filename in os.listdir(raw_folder):
-    if filename.endswith(".txt"):
-        with open(os.path.join(raw_folder, filename), "r", encoding="utf-8") as f:
-            emails.append(f.read())
-        # Simple labeling rule: spam_*.txt = 1, otherwise 0
-        labels.append(1.0 if filename.lower().startswith("spam") else 0.0)
 
-# Convert to TF-IDF vectors
-vectorizer = TfidfVectorizer(max_features=10)
-X = vectorizer.fit_transform(emails).toarray()
+# Preprocess email data
+def run_preprocess():
+    # Read all emails
+    emails = []
+    labels = []
 
-# Save processed data
-np.savetxt(os.path.join(output_folder, "processed_emails.csv"), X, delimiter=",")
+    for filename in os.listdir(raw_folder):
+        if filename.endswith(".txt"):
+            with open(os.path.join(raw_folder, filename), "r", encoding="utf-8") as f:
+                emails.append(f.read())
+            labels.append(1.0 if filename.lower().startswith("spam") else 0.0)
 
-# Load function for train.py
+    if len(emails) == 0:
+        raise RuntimeError("No .txt files found in ../data/raw")
+
+    # Convert to TF-IDF vectors
+    vectorizer = TfidfVectorizer(max_features=10)
+    X = vectorizer.fit_transform(emails).toarray()
+
+    # Save processed data
+    np.savetxt(os.path.join(output_folder, "processed_emails.csv"), X, delimiter=",")
+    np.savetxt(os.path.join(output_folder, "labels.csv"), labels, delimiter=",")
+
+    print("Preprocessing done.")
+    print("Saved processed_emails.csv and labels.csv")
+
+
+# Load processed data
 def load_data():
     """
     Returns:
-        dataset: list of tuples ([feature_vector], label)
+        dataset: list of tuples (feature_vector, label)
     """
-    X_loaded = np.loadtxt(os.path.join(output_folder, "processed_emails.csv"), delimiter=",")
-    dataset = list(zip(X_loaded, labels))
-    return dataset
+    X = np.loadtxt(os.path.join(output_folder, "processed_emails.csv"), delimiter=",")
+    y = np.loadtxt(os.path.join(output_folder, "labels.csv"), delimiter=",")
+
+    return list(zip(X, y))
+
+
+# Run preprocessing if this file is executed directly
+if __name__ == "__main__":
+    run_preprocess()
