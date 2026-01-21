@@ -8,9 +8,9 @@ def load_config():
         "batch_size": 32,       # size of each training batch
         "num_input": 100,       # number of input neurons
         "pos_range": 10,        # position range for neurons
-        "num_hidden": 50,       # number of hidden neurons
+        "num_hidden": 100,      # number of hidden neurons
         "seed": 42,             # random seed for reproducibility
-        "learning_rate": 0.1,   # learning rate for weight adjustment
+        "learning_rate": 0.5,   # learning rate for weight adjustment
     }
 
 def set_seed(config):
