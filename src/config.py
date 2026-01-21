@@ -9,7 +9,7 @@ def load_config():
         "num_input": 100,       # number of input neurons
         "pos_range": 10,        # position range for neurons
         "num_hidden": 100,      # number of hidden neurons
-        "seed": 42,             # random seed for reproducibility
+        "seed": 40,             # random seed for reproducibility
         "learning_rate": 0.5,   # learning rate for weight adjustment
     }
 
