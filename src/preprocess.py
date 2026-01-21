@@ -43,7 +43,7 @@ def run_preprocess():
         X = vectorizer.transform(emails).toarray()
     else:
         # Convert to TF-IDF vectors
-        vectorizer = TfidfVectorizer(max_features=10)
+        vectorizer = TfidfVectorizer(max_features=100)
         X = vectorizer.fit_transform(emails).toarray()
         # Save the vectorizer for future use
         joblib.dump(vectorizer, VECTORIZER_PATH)
@@ -55,14 +55,15 @@ def run_preprocess():
     print("Preprocessing done.")
     print("Saved processed_emails.csv and labels.csv")
 
-    # -------------------------------
-    # Sanity check: print mean TF-IDF vectors for each label
+
+
+# Sanity check function
+def sanity_check_tfidf(X, labels, label_values=[0.1, 0.25, 0.5, 0.75, 0.9]):
     y = np.array(labels)
-    for v in [0.1, 0.25, 0.5, 0.75, 0.9]:
+    for v in label_values:
         mask = np.isclose(y, v)
         if mask.any():
             print(f"Label {v}: mean TF-IDF vector = {X[mask].mean(axis=0)}")
-    # -------------------------------
 
 
 # Load processed data
@@ -80,3 +81,10 @@ def load_data():
 # Run preprocessing if this file is executed directly
 if __name__ == "__main__":
     run_preprocess()
+    # Optionally run sanity check
+    view = input("Do you want to see TF-IDF sanity check? (y/n): ").strip().lower()
+    # If yes, load data and run sanity check
+    if view == 'y':
+        X = np.loadtxt(os.path.join(output_folder, "processed_emails.csv"), delimiter=",")
+        labels = np.loadtxt(os.path.join(output_folder, "labels.csv"), delimiter=",")
+        sanity_check_tfidf(X, labels, verbose=True)
