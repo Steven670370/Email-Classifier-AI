@@ -18,7 +18,18 @@ def run_preprocess():
         if filename.endswith(".txt"):
             with open(os.path.join(raw_folder, filename), "r", encoding="utf-8") as f:
                 emails.append(f.read())
-            labels.append(1.0 if filename.lower().startswith("spam") else 0.0)
+            name = filename.lower()
+            # Assign labels based on filename conventions
+            if name.startswith("spam"):
+                labels.append(0.9)
+            elif name.startswith("maybe_spam"):
+                labels.append(0.75)
+            elif name.startswith("uncertain"):
+                labels.append(0.5)
+            elif name.startswith("maybe_ham"):
+                labels.append(0.25)
+            else:
+                labels.append(0.1)
 
     if len(emails) == 0:
         raise RuntimeError("No .txt files found in ../data/raw")
