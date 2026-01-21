@@ -55,6 +55,15 @@ def run_preprocess():
     print("Preprocessing done.")
     print("Saved processed_emails.csv and labels.csv")
 
+    # -------------------------------
+    # Sanity check: print mean TF-IDF vectors for each label
+    y = np.array(labels)
+    for v in [0.1, 0.25, 0.5, 0.75, 0.9]:
+        mask = np.isclose(y, v)
+        if mask.any():
+            print(f"Label {v}: mean TF-IDF vector = {X[mask].mean(axis=0)}")
+    # -------------------------------
+
 
 # Load processed data
 def load_data():
