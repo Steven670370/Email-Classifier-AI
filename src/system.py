@@ -1,3 +1,4 @@
+import numpy as np
 import math
 import random
 from typing import List
@@ -7,8 +8,7 @@ class Neuron:
     def __init__(self, pos_range=10):
         self.value = 0.5
         # Randomly generate a 2D position
-        self.position = (random.uniform(-pos_range, pos_range),
-                         random.uniform(-pos_range, pos_range))
+        self.distance = random.uniform(-pos_range, pos_range)
         # Weights to other neurons
         self.weights = {}  # key: target neuron, value: weight
         # Layer
@@ -26,8 +26,6 @@ def create_neuron(pos_range):
 
 # Activate function (for single layer)
 def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron], training=False):
-    layer_activated_neurons = list()
-    layer_unactivated_neurons = list()
     """
     Activate a group of target neurons based on nearby active neurons
     """
@@ -39,15 +37,14 @@ def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron], trai
         """
         for neuron in activated_neurons:
             # Calculate distance between neuron and target_neuron
-            dx = target_neuron.position[0] - neuron.position[0]
-            dy = target_neuron.position[1] - neuron.position[1]
-            distance = (dx**2 + dy**2) ** 0.5
+            dx = target_neuron.distance - neuron.distance
+            distance = abs(dx)
             # Get weight
             weight = target_neuron.weights.get(neuron, 1)
             total_contribution += neuron.value * ((1+distance)**-1) * weight
             active_neurons += 1
             # Update layer relationship
-            target_neuron.layer = max(target_neuron.layer, neuron.layer + 1)
+            target_neuron.layer = neuron.layer + 1
             # Store input relationship
             if(training and neuron not in target_neuron.input_vector):
                 target_neuron.input_vector.append(neuron)
@@ -59,12 +56,6 @@ def activate(activated_neurons: List[Neuron], target_neurons: List[Neuron], trai
         else:
             average_value = math.tanh(total_contribution / active_neurons)
         target_neuron.value = average_value
-        # Only add to actived layer if activated
-        if active_neurons > 0:
-            layer_activated_neurons.append(target_neuron)
-        else:
-            layer_unactivated_neurons.append(target_neuron)
-    return (layer_activated_neurons, layer_unactivated_neurons)
 
 # Forward propagation function (for multiple layers)
 def forward_propagate(all_neurons, input_neurons,  config, training=False):
@@ -73,24 +64,11 @@ def forward_propagate(all_neurons, input_neurons,  config, training=False):
         neuron.layer = 0  # Ensure input neurons have layer 0
     # Remaining neurons that are not yet activated
     unactivated_neurons = [n for n in all_neurons if n not in input_neurons]
-    
-    """ A fucking Error here: config is passed instead of max_layer """
-    max_layer = config.get("pos_range",3)
-    for i in range(1, max_layer):
-        # Select neurons in the current "layer" (distance from center <= i)
-        layer_neurons = [
-            n for n in unactivated_neurons
-            if (max(abs(n.position[0]), abs(n.position[1]))) <= i
-        ]
-        if not layer_neurons:
-            continue
-        # Activate neurons
-        layer_activated_neurons, _ = activate(activated_neurons, layer_neurons, training)
-        # Update activated list
-        activated_neurons += layer_activated_neurons
-        # Remove activated neurons from unactivated list
-        for n in layer_activated_neurons:
-            unactivated_neurons.remove(n)
+    unactivated_neurons.sort(key=lambda n: n.distance)
+    result = np.array_split(unactivated_neurons, config["layer"])
+    for i in range(config["layer"]):
+        activate(activated_neurons, result[i].tolist(), training)
+        activated_neurons += result[i].tolist()
 
 # ------------------------------------------------------------------
 
@@ -112,13 +90,11 @@ def conclusion(neurons, weight_judge, training):
 
 # Adjust weights and neuron positions by layers
 def adjust_neurons(neuron: Neuron, error: float, learning_rate=0.1, pos_rate=0.2):
-    total_x = 0.0
-    total_y = 0.0
     for upper_layer_neuron in neuron.input_vector:
+        total_distance = 0.0
         if neuron.layer != -1:
-            dx = neuron.position[0] - upper_layer_neuron.position[0]
-            dy = neuron.position[1] - upper_layer_neuron.position[1]
-            distance = (dx**2 + dy**2) ** 0.5
+            dx = neuron.distance - upper_layer_neuron.distance
+            distance = abs(dx)
             # Adjust weights and neuron positions by layers
             old_weight = neuron.weights.get(upper_layer_neuron, 0.1)
             # Recursively adjust the upper layer neuron
@@ -127,26 +103,12 @@ def adjust_neurons(neuron: Neuron, error: float, learning_rate=0.1, pos_rate=0.2
             new_weight = old_weight - learning_rate * upper_layer_neuron.value * error * ((1+distance)**-1)
             neuron.weights[upper_layer_neuron] = new_weight
             # Adjust position
-            total_x += 2 * (pos_rate * error * ((1+distance)**-2) * old_weight * upper_layer_neuron.value * dx)
-            total_y += 2 * (pos_rate * error * ((1+distance)**-2) * old_weight * upper_layer_neuron.value * dy)
+            total_distance += (pos_rate * error * ((1+distance)**-2) * old_weight * upper_layer_neuron.value)
         else:
-            # For input layer neurons, adjust position towards origin
-            dx = -neuron.position[0]
-            dy = -neuron.position[1]
-            distance = math.sqrt(dx*dx + dy*dy) + 1e-6
-            # Unit vector towards origin
-            ux = dx / distance
-            uy = dy / distance
             influence = ((1+distance)**-1)
             # Update position towards origin
-            neuron.position = (
-                neuron.position[0] + pos_rate * error * influence * ux,
-                neuron.position[1] + pos_rate * error * influence * uy
-            )
-        neuron.position = (
-            neuron.position[0] + min(total_x, 0.2),
-            neuron.position[1] + min(total_y, 0.2)
-        )
+            neuron.distance += pos_rate * error * influence
+        neuron.distance += total_distance
 
 
 
@@ -188,6 +150,7 @@ def train_one_epoch(model, dataset, config):
         # 3. compute output
         activated_neurons = [n for n in all_neurons if n.layer != -1]
         average_value = conclusion(activated_neurons, weight_judge, training=True)
+        print(f"Target: {target:.4f}, Predicted: {average_value:.4f}")
         # 4. backpropagation
         error = target - average_value
         for neuron in activated_neurons:

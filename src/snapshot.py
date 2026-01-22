@@ -3,11 +3,9 @@ import json
 
 # Convert a neuron object to a JSON-serializable dictionary
 def neuron_to_json(neuron):
-    x, y = neuron.position
     layer = None if neuron.layer == float('inf') else neuron.layer
     return {
-        "x": x,
-        "y": y,
+        "distance": neuron.distance,
         "value": neuron.value,
         "layer": layer
     }
