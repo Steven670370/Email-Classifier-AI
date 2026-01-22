@@ -19,7 +19,7 @@ def predict(model, inputs, weight_judge, config):
         training=False
     )
     # 4. output
-    return conclusion(all_neurons, weight_judge)
+    return conclusion(all_neurons, weight_judge, training=False)
 
 # Predict for a batch of inputs
 def predict_batch(model, dataset, config):

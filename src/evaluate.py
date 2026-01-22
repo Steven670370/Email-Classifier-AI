@@ -14,8 +14,8 @@ def evaluate(model, dataset, weight_judge, config):
         for neuron, value in zip(input_neurons, inputs):
             neuron.value = value
         # 3. forward (no training side effects)
-        forward_propagate(all_neurons, input_neurons, config)
+        forward_propagate(all_neurons, input_neurons, config, training=False)
         # 4. output
-        output = conclusion(all_neurons, weight_judge)
+        output = conclusion(all_neurons, weight_judge, training=False)
         total_error += abs(target - output)
     return total_error / len(dataset)

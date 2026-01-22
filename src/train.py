@@ -59,7 +59,7 @@ def main():
         # Save snapshot
         save_epoch_snapshot(all_neurons, epoch)
         # Validation error
-        val_error = evaluate(model, val_dataset, config, weight_judge)
+        val_error = evaluate(model, val_dataset, weight_judge, config)
         logging.info(f"Epoch {epoch}: avg validation error = {val_error:.4f}")
     # Final evaluation on test set
     final_error = evaluate(model, test_dataset, config, weight_judge)
