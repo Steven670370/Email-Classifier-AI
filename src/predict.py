@@ -1,7 +1,7 @@
 from system import forward_propagate, conclusion
 
 # Predict for a single input
-def predict(model, inputs, config):
+def predict(model, inputs, weight_judge, config):
     input_neurons = model["input"]
     all_neurons = model["all"]
     # 1. reset transient state
@@ -19,7 +19,7 @@ def predict(model, inputs, config):
         training=False
     )
     # 4. output
-    return conclusion(all_neurons)
+    return conclusion(all_neurons, weight_judge)
 
 # Predict for a batch of inputs
 def predict_batch(model, dataset, config):

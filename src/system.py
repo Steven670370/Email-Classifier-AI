@@ -96,13 +96,13 @@ def forward_propagate(all_neurons, input_neurons, config, training=False):
 # ------------------------------------------------------------------
 
 # Conclusion function
-def conclusion(neurons):
+def conclusion(neurons, weight_judge):
     total = 0.0
     weight_sum = 0.0
-    for n in neurons:
-        depth_weight = math.exp(-n.layer)
-        total += depth_weight * n.value
-        weight_sum += depth_weight
+    for neuron in neurons:
+        w = weight_judge.get(neuron, 0)
+        total += neuron.value * w
+        weight_sum += w
     return total / weight_sum if weight_sum > 0 else 0.5
 
 
@@ -170,6 +170,8 @@ def train_one_epoch(model, dataset, config):
     input_neurons = model["input"]
     hidden_neurons = model["hidden"]
     all_neurons = model["all"]
+    # Initialize weight judge
+    weight_judge = {}
     # Iterate through dataset
     for inputs, target in dataset:
         # 1. input values
@@ -178,14 +180,15 @@ def train_one_epoch(model, dataset, config):
         # 2. forward activation
         forward_propagate(hidden_neurons, input_neurons, config, training=True)
         # 3. compute output
-        average_value = conclusion(all_neurons)
+        activated_neurons = [n for n in all_neurons if n.layer != -1]
+        average_value = conclusion(activated_neurons, weight_judge)
         # 4. backpropagation
         error = target - average_value
-        for neuron in hidden_neurons:
-            if not neuron.output_vector:
-                adjust_neurons(
-                    neuron,
-                    error,
-                    learning_rate=config["learning_rate"],
-                    pos_rate=config["pos_rate"]
-                )
+        for neuron in activated_neurons:
+            adjust_neurons(
+                neuron,
+                weight_judge.get(neuron, 0) * error,
+                learning_rate=config["learning_rate"],
+                pos_rate=config["pos_rate"]
+            )
+        return weight_judge

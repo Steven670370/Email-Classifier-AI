@@ -1,6 +1,6 @@
 from system import forward_propagate, conclusion
 
-def evaluate(model, dataset, config):
+def evaluate(model, dataset, weight_judge, config):
     total_error = 0.0
     input_neurons = model["input"]
     all_neurons = model["all"]
@@ -16,6 +16,6 @@ def evaluate(model, dataset, config):
         # 3. forward (no training side effects)
         forward_propagate(all_neurons, input_neurons, config)
         # 4. output
-        output = conclusion(all_neurons)
+        output = conclusion(all_neurons, weight_judge)
         total_error += abs(target - output)
     return total_error / len(dataset)
