@@ -101,7 +101,3 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
             neuron.weight_error = {}
             neuron.distance_error = 0.0
             neuron.error = 0.0
-
-def conclusion_propagation(model, target_value, learning_rate, pos_rate):
-    forward_propagation(model)
-    backward_propagation(model, target_value, learning_rate, pos_rate)
