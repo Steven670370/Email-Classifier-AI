@@ -1,6 +1,7 @@
 import os
 import joblib
 import numpy as np
+from config import load_config
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Define paths
@@ -22,15 +23,15 @@ def run_preprocess():
             name = filename.lower()
             # Assign labels based on filename conventions
             if name.startswith("spam"):
-                labels.append(1)
+                labels.append(0.1)
             elif name.startswith("maybe_spam"):
-                labels.append(1)
+                labels.append(0.2)
             elif name.startswith("uncertain"):
                 labels.append(0.5)
             elif name.startswith("maybe_ham"):
-                labels.append(0)
+                labels.append(0.8)
             else:
-                labels.append(0)
+                labels.append(0.9)
 
     if len(emails) == 0:
         raise RuntimeError("No .txt files found in ../data/raw")
@@ -43,7 +44,8 @@ def run_preprocess():
         X = vectorizer.transform(emails).toarray()
     else:
         # Convert to TF-IDF vectors
-        vectorizer = TfidfVectorizer(max_features=100)
+        config = load_config()
+        vectorizer = TfidfVectorizer(max_features=config["num_input"])
         X = vectorizer.fit_transform(emails).toarray()
         # Save the vectorizer for future use
         joblib.dump(vectorizer, VECTORIZER_PATH)
@@ -58,7 +60,7 @@ def run_preprocess():
 
 
 # Sanity check function
-def sanity_check_tfidf(X, labels, label_values=[0.1, 0.25, 0.5, 0.75, 0.9]):
+def sanity_check_tfidf(X, labels, label_values=[0, 0.2, 0.5, 0.8, 1], verbose=False):
     y = np.array(labels)
     for v in label_values:
         mask = np.isclose(y, v)

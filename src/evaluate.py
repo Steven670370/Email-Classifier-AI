@@ -9,7 +9,7 @@ def evaluate(model, dataset, config):
         # 1. reset transient state
         for n in all_neurons:
             n.value = 0.0
-            n.layer = float('inf')
+            n.layer = -1
         # 2. set input
         for neuron, value in zip(input_neurons, inputs):
             neuron.value = value
