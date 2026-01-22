@@ -1,0 +1,4 @@
+Hello,
+Your account has been flagged for review.
+Confirm your details now to avoid suspension.
+Act quickly.

@@ -45,6 +45,9 @@ def main():
     # Get all neurons for snapshotting
     all_neurons = model["neurons"]
     batch_size = config.get("batch_size", 32) # default batch size
+
+    weight_judge = {}
+
     # Training loop with mini-batches
     for epoch in range(config["epochs"]):
         # Shuffle training data
@@ -52,14 +55,14 @@ def main():
         # Process mini-batches
         for i in range(0, len(train_dataset), batch_size):
             batch = train_dataset[i:i+batch_size]
-            train_one_epoch(model, batch, config)
+            weight_judge = train_one_epoch(model, batch, config)
         # Save snapshot
         save_epoch_snapshot(all_neurons, epoch)
         # Validation error
-        val_error = evaluate(model, val_dataset)
+        val_error = evaluate(model, val_dataset, weight_judge, config)
         logging.info(f"Epoch {epoch}: avg validation error = {val_error:.4f}")
     # Final evaluation on test set
-    final_error = evaluate(model, test_dataset)
+    final_error = evaluate(model, test_dataset, config, weight_judge)
     logging.info(f"Final test error = {final_error:.4f}")
 
 if __name__ == "__main__":

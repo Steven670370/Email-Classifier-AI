@@ -1,0 +1,3 @@
+Important message,
+Your payment information needs verification.
+Update your details now to avoid service interruption.
