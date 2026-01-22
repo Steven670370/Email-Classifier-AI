@@ -8,6 +8,7 @@ def neuron_to_json(neuron):
     return {
         "x": x,
         "y": y,
+        "value": neuron.value,
         "layer": layer
     }
 

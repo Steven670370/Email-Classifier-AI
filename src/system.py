@@ -4,10 +4,11 @@ from typing import List
 # Define the Neuron class globally
 class Neuron:
     def __init__(self, pos_range=10):
-        self.value = 0
+        self.value = random.uniform(0.1, 0.9)
         # Randomly generate a 2D position
         self.position = (random.uniform(-pos_range, pos_range),
                          random.uniform(-pos_range, pos_range))
+        print(f"Created neuron at position with value: {self.position, self.value}")
         # Weights to other neurons
         self.weights = {}  # key: target neuron, value: weight
         # Layer
@@ -106,7 +107,7 @@ def conclusion(neurons: List[Neuron]):
     It is NOT part of the network and will be discarded immediately.
     """
     # virtual global node (not stored)
-    total_value = sum(n.value for n in neurons if not n.output_vector)
+    total_value = sum(n.value for n in neurons if abs(n.value) > 1e-6 and len(n.input_vector) > 0)
     average_value = total_value / len(neurons) if neurons else 0.0
     if average_value > 0.6:
         return 1
@@ -176,7 +177,12 @@ def init_model(config):
     hidden_neurons = [Neuron(config["pos_range"]) for _ in range(config["num_hidden"])]
     all_neurons = input_neurons + hidden_neurons
     for n in input_neurons:
+        n.value = 1.0
         n.layer = 0 # input layer (origin point)
+        n.position = (0.0, 0.0) # center position
+    for n in hidden_neurons:
+        n.value = 0
+        n.layer = float('inf') # hidden layer
     return {
         "input": input_neurons,
         "hidden": hidden_neurons,
