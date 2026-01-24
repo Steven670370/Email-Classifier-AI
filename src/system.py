@@ -4,6 +4,8 @@ import random
 from typing import List
 
 class Neuron:
+    _id_counter = 0 # Variable for the Neuron class
+
     def __init__(self, pos_range, layer=float('inf')):
         self.distance = random.uniform(-pos_range, pos_range)
         self.layer = layer          # layer index
@@ -12,6 +14,9 @@ class Neuron:
         self.error = 0.0            # error term for training
         self.value = 0.5            # activation value
         self.weights = {}           # weights to other neurons
+        # for snapshot
+        self.id = Neuron._id_counter
+        Neuron._id_counter += 1
 
 def init_model(config):
     num_input = config["num_input"]
@@ -19,7 +24,10 @@ def init_model(config):
     pos_range = config["pos_range"]
     layer_count = config["layer"]
 
-    all_neurons = [[]]
+    # 0: input
+    # 1~layer_count: hidden
+    # layer_count+1: output 
+    all_neurons = [[] for _ in range(layer_count + 2)]
     activated_neurons = []
 
     # Create input neurons
@@ -84,7 +92,10 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
             neuron_error = 0
             for target in neurons[neurons.index(layer)+1]:
                 if neuron in target.weights:
-                    neuron_error += target.error * target.weights[neuron] if neuron.value > 0 else 0
+                    # target neuron is affected by neuron in forward propagation, so we don't check its value here
+                    # only check neuron.value > 0 for ReLU
+                    neuron_error += target.error * target.weights[neuron] if neuron.value > 0 else 0    
+            # accumulate error
             neuron.error = neuron_error
             for target, weight in neuron.weights.items():
                 grad = neuron_error * neuron.value
@@ -92,7 +103,7 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
                 # Update distance
                 distance_grad = neuron_error * weight * neuron.value * (neuron.distance - target.distance)**-2 if neuron.distance != target.distance else 0
                 neuron.distance_error += pos_rate * distance_grad
-
+     
     for layer in neurons:
         for neuron in layer:
             for target in neuron.weights:
@@ -101,3 +112,34 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
             neuron.weight_error = {}
             neuron.distance_error = 0.0
             neuron.error = 0.0
+
+
+# Return the value of output neuron
+def conclusion(model):
+    neurons = model["neurons"]
+    return neurons[-1][0].value
+
+
+def train_one_epoch(model, batch, config):
+    learning_rate = config["learning_rate"]
+    pos_rate = config.get("pos_rate", 0.0)
+
+    total_loss = 0.0
+
+    for x_values, y in batch:
+        # 1. set input layer
+        input_layer = model["neurons"][0]
+        for neuron, x in zip(input_layer, x_values):
+            neuron.value = x
+
+        # 2. forward propagation
+        forward_propagation(model)
+
+        # 3. backward propagation (in-place update)
+        backward_propagation(model, y, learning_rate, pos_rate)
+
+        # 4. loss (optional, for logging/debug)
+        y_hat = conclusion(model)
+        total_loss += abs(y_hat - y)
+
+        return total_loss / len(batch)
