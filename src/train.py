@@ -46,23 +46,31 @@ def main():
     all_neurons = model["neurons"]
     batch_size = config.get("batch_size", 32) # default batch size
 
-    weight_judge = {}
-
     # Training loop with mini-batches
     for epoch in range(config["epochs"]):
         # Shuffle training data
         np.random.shuffle(train_dataset)
+
+        epoch_loss = 0.0
+        steps = 0
         # Process mini-batches
         for i in range(0, len(train_dataset), batch_size):
             batch = train_dataset[i:i+batch_size]
-            weight_judge = train_one_epoch(model, batch, config)
+            batch_loss = train_one_epoch(model, batch, config)
+            epoch_loss += batch_loss
+            steps += 1
+        avg_loss = epoch_loss / steps
+        logging.info(f"Epoch {epoch}: train loss = {avg_loss:.6f}")
+
         # Save snapshot
         save_epoch_snapshot(all_neurons, epoch)
+
         # Validation error
-        val_error = evaluate(model, val_dataset, weight_judge, config)
+        val_error = evaluate(model, val_dataset, config)
         logging.info(f"Epoch {epoch}: avg validation error = {val_error:.4f}")
+    
     # Final evaluation on test set
-    final_error = evaluate(model, test_dataset, config, weight_judge)
+    final_error = evaluate(model, test_dataset, config)
     logging.info(f"Final test error = {final_error:.4f}")
 
 if __name__ == "__main__":

@@ -1,21 +1,24 @@
-from system import forward_propagate, conclusion
+from system import forward_propagation, conclusion
 
-def evaluate(model, dataset, weight_judge, config):
+def evaluate(model, dataset, config):
     total_error = 0.0
-    input_neurons = model["input"]
-    all_neurons = model["all"]
+    neurons = model["neurons"]
+    input_layer = neurons[0]
+    output_neuron = neurons[-1][0]
+
     # Iterate through dataset
-    for inputs, target in dataset:
-        # 1. reset transient state
-        for n in all_neurons:
-            n.value = 0.0
-            n.layer = -1
-        # 2. set input
-        for neuron, value in zip(input_neurons, inputs):
-            neuron.value = value
-        # 3. forward (no training side effects)
-        forward_propagate(all_neurons, input_neurons, config, training=False)
-        # 4. output
-        output = conclusion(all_neurons, weight_judge, training=False)
-        total_error += abs(target - output)
+    for x_values, target in dataset:
+        # 1. set input
+        for neuron, x in zip(input_layer, x_values):
+            neuron.value = x
+
+        # 2. forward only
+        forward_propagation(model)
+
+        # 3. output
+        output = conclusion(model)
+
+        # 4. error
+        total_error += abs(output - target)
+
     return total_error / len(dataset)
