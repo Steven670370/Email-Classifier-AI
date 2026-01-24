@@ -1,13 +1,18 @@
 import numpy as np
-import math
 import random
+from config import load_config, set_seed
 from typing import List
+
+config = load_config() 
+rng = set_seed(config) # If you want random distance, just delete it
 
 class Neuron:
     _id_counter = 0 # Variable for the Neuron class
 
-    def __init__(self, pos_range, layer=float('inf')):
-        self.distance = random.uniform(-pos_range, pos_range)
+    def __init__(self, pos_range, layer=-1, rng=None):
+        self.rng = rng or random
+        self.distance = self.rng.uniform(-pos_range, pos_range)
+
         self.layer = layer          # layer index
         self.weight_error = {}      # weight error term for backpropagation
         self.distance_error = 0.0   # distance error for backpropagation
@@ -32,7 +37,7 @@ def init_model(config):
 
     # Create input neurons
     for _ in range(num_input):
-        neuron = Neuron(pos_range, layer=0)
+        neuron = Neuron(pos_range, layer=0, rng=rng) # Fixed random number
         all_neurons[0].append(neuron)
         activated_neurons.append(neuron)
 
@@ -51,7 +56,9 @@ def init_model(config):
         activated_neurons = this_layer_neurons
 
     # Create output neuron
-    output_neuron = Neuron(pos_range, layer=float('inf'))
+    output_neuron = Neuron(pos_range, layer=float('inf'), rng=rng)
+    output_neuron.distance = float('inf')
+
     all_neurons[layer_count+1].append(output_neuron)
     for activated_neuron in activated_neurons:
         output_neuron.weights[activated_neuron] = random.uniform(-0.5, 0.5)

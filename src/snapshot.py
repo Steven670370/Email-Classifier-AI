@@ -19,10 +19,18 @@ def neuron_to_json(neuron,layer_idx, neuron_idx):
 def save_epoch_snapshot(neurons, epoch, out_dir="snapshots"):
     os.makedirs(out_dir, exist_ok=True)
     # Prepare data
-    all_neurons = [n for layer in neurons for n in layer]
+    all_neurons = [
+        (lidx, nidx, neuron)
+        for lidx, layer in enumerate(neurons)
+        for nidx, neuron in enumerate(layer)
+    ]
+
     data = {
         "epoch": epoch,
-        "neurons": [neuron_to_json(n) for n in all_neurons]
+        "neurons": [
+            neuron_to_json(neuron, lidx, nidx)
+            for lidx, nidx, neuron in all_neurons
+        ]
     }
     # Write to file
     path = os.path.join(out_dir, f"epoch_{epoch:03d}.json")
