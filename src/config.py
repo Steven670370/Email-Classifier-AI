@@ -12,7 +12,7 @@ def load_config():
         "seed": 26,             # random seed for reproducibility
         "learning_rate": 0.2,   # learning rate for weight adjustment
         "pos_rate": 0.05,       # position adjustment rate
-        "layer": 5              # number of layers in the network
+        "layer": 3              # number of layers in the network
     }
 
 def set_seed(config):
