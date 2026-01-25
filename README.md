@@ -116,22 +116,22 @@ On the test dataset, the model achieves a test error of **0.0772**, measured usi
 - Forward Propagation
 ```mermaid
 flowchart TD
-    A[Neuron_A.value] --> D[Neuron_B.value]
-    B[Neuron_B.weight(Neuron_A)] --> D
+    A[Neuron_A_value] --> D[Neuron_B_value]
+    B[Neuron_B_weight : Neuron_A] --> D
     C[Distance between A and B] --> D
-    D --> G[Output_Neuron.value]
-    E[Output_Neuron.weight(Neuron_B)] --> G
+    D --> G[Output_Neuron_value]
+    E[Output_Neuron_weight : Neuron_B] --> G
     F[Distance between Neuron_B and Output_Neuron] --> G
     G --> H[Loss_Value]
 ```
 - Backward Propagation
 ```mermaid
 flowchart TD
-    A[Loss_Value] --> B[∂L/∂v_output]
-    B --> C[∂L/∂v_output * ∂v_output/∂d_1]
-    B --> D[∂L/∂v_output * ∂v_output/∂w_output]
-    B --> E[∂L/∂v_output * ∂v_output/∂v_B (v_B = v_A * w_B * d_2)]
-    E --> F[∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂d_2]
-    E --> G[∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂w_B]
-    E --> H[∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂v_A]
+    A[Loss_Value] --> B["∂L/∂v_output"]
+    B --> C["∂L/∂v_output * ∂v_output/∂d_1"]
+    B --> D["∂L/∂v_output * ∂v_output/∂w_output"]
+    B --> E["∂L/∂v_output * ∂v_output/∂v_B \\n (v_B = v_A * w_B * d_2)"]
+    E --> F["∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂d_2"]
+    E --> G["∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂w_B"]
+    E --> H["∂L/∂v_output * ∂v_output/∂v_B * ∂v_B/∂v_A"]
 ```
