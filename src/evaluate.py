@@ -1,4 +1,5 @@
 from system import forward_propagation, conclusion
+import numpy as np
 
 def evaluate(model, dataset, config):
     total_error = 0.0
@@ -19,6 +20,6 @@ def evaluate(model, dataset, config):
         output = conclusion(model)
 
         # 4. error
-        total_error += abs(output - target)
+        total_error += 0.5 * (output - target)**2
 
     return total_error / len(dataset)

@@ -3,6 +3,7 @@ import json
 
 # Convert a neuron object to a JSON-serializable dictionary
 def neuron_to_json(neuron,layer_idx, neuron_idx):
+    
     layer = None if neuron.layer == -1 else neuron.layer
     # Serialize weights dict
     weights_serializable = {k.id: v for k, v in neuron.weights.items()}
@@ -17,6 +18,9 @@ def neuron_to_json(neuron,layer_idx, neuron_idx):
 
 # Save a snapshot of the neurons' states at a given epoch
 def save_epoch_snapshot(neurons, epoch, out_dir="snapshots"):
+    if neurons is None:
+        return
+
     os.makedirs(out_dir, exist_ok=True)
     # Prepare data
     all_neurons = [

@@ -3,6 +3,7 @@ import joblib
 import numpy as np
 from config import load_config
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
 
 # Define paths
 raw_folder = "../data/raw"
@@ -23,7 +24,7 @@ def run_preprocess():
             name = filename.lower()
             # Assign labels based on filename conventions
             if name.startswith("spam"):
-                labels.append(0.1)
+                labels.append(0)
             elif name.startswith("maybe_spam"):
                 labels.append(0.2)
             elif name.startswith("uncertain"):
@@ -31,7 +32,7 @@ def run_preprocess():
             elif name.startswith("maybe_ham"):
                 labels.append(0.8)
             else:
-                labels.append(0.9)
+                labels.append(1)
 
     if len(emails) == 0:
         raise RuntimeError("No .txt files found in ../data/raw")
@@ -45,13 +46,35 @@ def run_preprocess():
     else:
         # Convert to TF-IDF vectors
         config = load_config()
-        vectorizer = TfidfVectorizer(max_features=config["num_input"])
+        vectorizer = TfidfVectorizer(
+            max_features=config["num_input"],
+            sublinear_tf=True,
+            ngram_range=(1, 2),
+            min_df=2,
+            max_df=0.9
+        )
         X = vectorizer.fit_transform(emails).toarray()
         # Save the vectorizer for future use
         joblib.dump(vectorizer, VECTORIZER_PATH)
+       
+    # Step 1: Standardize
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Step 2: Compute label-wise means
+    y = np.array(labels)
+    unique_labels = np.unique(y)
+    label_means = np.array([X_scaled[np.isclose(y, lbl)].mean(axis=0) for lbl in unique_labels])
+
+    # Step 3: Compute feature differences
+    diff_vector = label_means.max(axis=0) - label_means.min(axis=0)
+    diff_vector = diff_vector / (diff_vector.max() + 1e-6)  # normalize
+
+    # Step 4: Weight features by label difference
+    X_weighted = X_scaled * diff_vector
 
     # Save processed data
-    np.savetxt(os.path.join(output_folder, "processed_emails.csv"), X, delimiter=",")
+    np.savetxt(os.path.join(output_folder, "processed_emails.csv"), X_weighted, delimiter=",")
     np.savetxt(os.path.join(output_folder, "labels.csv"), labels, delimiter=",")
 
     print("Preprocessing done.")
