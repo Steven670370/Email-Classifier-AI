@@ -72,6 +72,7 @@ function renderTreeDiagram(neurons: Neuron[], width = 800, height = 800) {
             const weight = neuron.weights[prevNeuron.id] ?? 0.1
             const strokeOpacity = Math.min(Math.max(weight, 0.1), 1)
             return (
+              // Draw lines between neurons
               <line
                 key={`${prevNeuron.id}-${neuron.id}`}
                 x1={cx + px}
@@ -138,7 +139,7 @@ function App() {
         {divtitle}
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons: Prev and Next */}
       <div style={{ marginBottom: '20px' }}>
         <button onClick={() => setEpochIndex(i => Math.max(i - 1, 0))}>Prev</button>
         <button
@@ -153,8 +154,10 @@ function App() {
 
       {/* Render tree diagram or loading */}
       {allData[epochIndex]?.neurons ? (
+        // if the array contains neurons
         renderTreeDiagram(allData[epochIndex].neurons, 800, 800)
       ) : (
+        // else
         <p>Loading snapshots...</p>
       )}
     </div>
