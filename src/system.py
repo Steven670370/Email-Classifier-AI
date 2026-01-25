@@ -85,7 +85,7 @@ def forward_propagation(model):
                 total_input = 0.0
                 for target, weight in neuron.weights.items():
                     if neuron.distance != float('inf') and target.distance != float('inf'):
-                        total_input += target.value * weight #* (abs(neuron.distance - target.distance)+1)**-1
+                        total_input += target.value * weight * (abs(neuron.distance - target.distance)+1)**-1
                     else:
                         total_input += target.value * weight
                 if neuron.layer == neurons[-1][0].layer:
@@ -113,10 +113,10 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
 
                         # target neuron is affected by neuron in forward propagation, so we don't check its value here
                         # only check neuron.value > 0 for ReLU
-                        neuron_error += relu_grad * next_neuron.error * next_neuron.weights[neuron] #* (abs(next_neuron.distance - neuron.distance)+1)**-1
+                        neuron_error += relu_grad * next_neuron.error * next_neuron.weights[neuron] * (abs(next_neuron.distance - neuron.distance)+1)**-1
 
                         # Update weight for y=v*((1+d)**-2)*weight
-                        grad = next_neuron.error * neuron.value #* (abs(next_neuron.distance - neuron.distance)+1)**-1
+                        grad = next_neuron.error * neuron.value * (abs(next_neuron.distance - neuron.distance)+1)**-1
                         next_neuron.weight_error[neuron] = grad
 
                         # Update distance for y=v*((1+d)**-2)*weight

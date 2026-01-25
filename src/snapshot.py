@@ -17,11 +17,11 @@ def neuron_to_json(neuron,layer_idx, neuron_idx):
     }
 
 # Save a snapshot of the neurons' states at a given epoch
-def save_epoch_snapshot(neurons, epoch, out_dir="snapshots"):
+def save_epoch_snapshot(neurons, epoch, react_public_dir="../react-app/public/snapshots"):
     if neurons is None:
         return
 
-    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(react_public_dir, exist_ok=True)
     # Prepare data
     all_neurons = [
         (lidx, nidx, neuron)
@@ -37,6 +37,12 @@ def save_epoch_snapshot(neurons, epoch, out_dir="snapshots"):
         ]
     }
     # Write to file
-    path = os.path.join(out_dir, f"epoch_{epoch:03d}.json")
+    path = os.path.join(react_public_dir, f"epoch_{epoch:03d}.json")
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+    # Update index
+    index_path = os.path.join(react_public_dir, "index.json")
+    files = sorted([f for f in os.listdir(react_public_dir) if f.endswith(".json") and f != "index.json"])
+    with open(index_path, "w") as f:
+        json.dump(files, f, indent=2)
