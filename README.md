@@ -117,10 +117,10 @@ On the test dataset, the model achieves a test error of **0.0772**, measured usi
 ```mermaid
 flowchart TD
     A[Neuron_A.value] --> D[Neuron_B.value]
-    B[Neuron_B.weight[Neuron_A]] --> D
+    B[Neuron_B.weight(Neuron_A)] --> D
     C[Distance between A and B] --> D
     D --> G[Output_Neuron.value]
-    E[Output_Neuron.weight[Neuron_B]] --> G
+    E[Output_Neuron.weight(Neuron_B)] --> G
     F[Distance between Neuron_B and Output_Neuron] --> G
     G --> H[Loss_Value]
 ```
