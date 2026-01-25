@@ -138,67 +138,6 @@ def backward_propagation(model, target_value, learning_rate, pos_rate):
             neuron.distance_error = 0.0
             neuron.error = 0.0
 
-"""
-def backward_propagation(model, target_value, learning_rate, pos_rate):
-    neurons = model["neurons"]
-
-    # =========================
-    # 1️⃣ 输出层 delta
-    # =========================
-    # 注意：你的输出层在最后一个非空层
-    output_layer = neurons[-1]
-    output_neuron = output_layer[0]
-
-    # Sigmoid + MSE
-    # delta = dL/dz
-
-    ###############
-    y_hat = output_neuron.value
-    output_neuron.error = (y_hat - target_value) * y_hat * (1 - y_hat)
-
-    # =========================
-    # 2️⃣ 隐藏层 delta（不包含输入层）
-    # =========================
-    # 从“输出层前一层”一直算到 index = 1
-    for layer_idx in range(len(neurons) - 2, 0, -1):
-        layer = neurons[layer_idx]
-        next_layer = neurons[layer_idx + 1]
-
-        for neuron in layer:
-            # Leaky ReLU 导数（只和当前 neuron 有关）
-            relu_grad = 1.0 if neuron.value > 0 else 0.5
-
-            delta = 0.0
-            for next_neuron in next_layer:
-                if neuron in next_neuron.weights:
-                    delta += next_neuron.error * next_neuron.weights[neuron]
-
-            neuron.error = delta * relu_grad
-
-    # =========================
-    # 3️⃣ 计算所有权重梯度
-    # =========================
-    for layer_idx in range(len(neurons) - 1):
-        layer = neurons[layer_idx]
-        next_layer = neurons[layer_idx + 1]
-
-        for next_neuron in next_layer:
-            for neuron in layer:
-                if neuron in next_neuron.weights:
-                    grad = next_neuron.error * neuron.value
-                    next_neuron.weight_error[neuron] = grad
-
-    # =========================
-    # 4️⃣ 更新权重并清理缓存
-    # =========================
-    for layer in neurons:
-        for neuron in layer:
-            for prev_neuron, grad in neuron.weight_error.items():
-                neuron.weights[prev_neuron] -= learning_rate * grad
-
-            neuron.weight_error.clear()
-            neuron.error = 0.0
-"""
 
 # Return the value of output neuron
 def conclusion(model):
